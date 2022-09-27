@@ -2,13 +2,30 @@
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <iostream>
-
+#include <fstream>
+#include <regex>
+#include <algorithm>
+// https://github.com/zeux/pugixml
 namespace http = boost::beast::http;
 
 // http://iss.moex.com/iss/history/engines/stock/markets/shares/boa
 //rds/tqbr/securities.xml?date=2013-12-20
 
+std::string cut(const std::string &str, const char* find) {
+    std::string s;
+    std::string::size_type pos = str.find(find);
+    if (pos != std::string::npos)
+        s = str.substr(pos);
+    return s;
+}
+
+//std::string readFile(const std::string& fileName) {
+//    return std::string((std::istreambuf_iterator<char>(std::ifstream(fileName))),
+//                       std::istreambuf_iterator<char>());
+//}
+
 int main() {
+    /*
     const std::string host = "iss.moex.com";
     const std::string target = "/iss/history/engines/stock/markets/shares/boards/tqbr/securities.xml?date=2013-12-20";
 
@@ -37,11 +54,35 @@ int main() {
         boost::beast::flat_buffer buffer;
         http::response<http::dynamic_body> res;
         http::read(socket, buffer, res);
-
-        std::cout << res << std::endl;
+        std::fstream fout("status.xml", std::ios::out);
+        if (fout.is_open()) {
+            fout << res << std::endl;
+            fout.close();
+        }
+//        std::string s ;
+//        std::cout << s << std::endl;
     }
     // Закрываем соединение
     socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+*/
+    std::fstream fin("status.xml", std::ios::in);
+    std::string s{std::istreambuf_iterator<char>(fin), std::istreambuf_iterator<char>()};
+    using namespace std;
+
+//    s.substr(s.find("<"));
+    auto s2 = cut(s, "<");
+    for (size_t i = 0; i < 9; ++i)
+        s2.pop_back();
+//    cout << s2 << endl;
+
+    std::regex r("<rows>(\\d+)</rows>");
+    std::smatch m;
+
+    while (std::regex_search (s2, m, r))
+    {
+        std::cout << m[1] << std::endl;
+//        s = m.suffix().str();
+    }
 
     return 0;
 }
