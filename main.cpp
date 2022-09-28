@@ -5,24 +5,31 @@
 #include <fstream>
 #include <regex>
 #include <algorithm>
-// https://github.com/zeux/pugixml
+
 namespace http = boost::beast::http;
 
 // http://iss.moex.com/iss/history/engines/stock/markets/shares/boa
 //rds/tqbr/securities.xml?date=2013-12-20
 
 std::string cut(const std::string &str, const char* find) {
-    std::string s;
     std::string::size_type pos = str.find(find);
     if (pos != std::string::npos)
-        s = str.substr(pos);
-    return s;
+        return str.substr(pos);
+    return std::string();
 }
 
-//std::string readFile(const std::string& fileName) {
-//    return std::string((std::istreambuf_iterator<char>(std::ifstream(fileName))),
-//                       std::istreambuf_iterator<char>());
-//}
+std::vector<std::string> getPosition(std::string &str) {
+    const auto SIZE = std::count(str.begin(), str.end(), '>');
+    std::vector<std::string> pos(SIZE);
+    for (size_t i = 0; i < SIZE; ++i) {
+//        n = str.find('>') + 1;
+        pos.push_back(str.substr(0, (str.find('>') + 1)));
+//        std::cout << str.substr(0,  n);
+        str = cut(str, "\n");
+        str = cut(str, "<");
+    }
+    return pos;
+}
 
 int main() {
     /*
@@ -70,19 +77,22 @@ int main() {
     using namespace std;
 
 //    s.substr(s.find("<"));
-    auto s2 = cut(s, "<");
-    for (size_t i = 0; i < 9; ++i)
-        s2.pop_back();
-//    cout << s2 << endl;
+    auto s2 = cut(s, "<row ");
+    s2 = s2.substr(0, s2.find("</rows>"));
+    cout << s2 << endl;
 
-    std::regex r("<rows>(\\d+)</rows>");
-    std::smatch m;
-
-    while (std::regex_search (s2, m, r))
-    {
-        std::cout << m[1] << std::endl;
-//        s = m.suffix().str();
+    auto pos = getPosition(s2);
+    for (auto i : pos) {
+        cout << i << endl;
     }
+//    std::regex r("<rows>(\\d+)</rows>");
+//    std::smatch m;
+//
+//    while (std::regex_search (s2, m, r))
+//    {
+//        std::cout << m[1] << std::endl;
+////        s = m.suffix().str();
+//    }
 
     return 0;
 }
