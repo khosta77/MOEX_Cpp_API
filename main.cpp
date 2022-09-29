@@ -11,11 +11,27 @@ namespace http = boost::beast::http;
 // http://iss.moex.com/iss/history/engines/stock/markets/shares/boa
 //rds/tqbr/securities.xml?date=2013-12-20
 
+struct stock {
+    std::string date;
+    float open;
+    float close;
+    float low;
+    float high;
+};
+
 std::string cut(const std::string &str, const char* find) {
     std::string::size_type pos = str.find(find);
     if (pos != std::string::npos)
         return str.substr(pos);
     return std::string();
+}
+
+std::string parser(const std::string &str, const std::string &find) {
+    std::string pr;
+    for (size_t i = (str.find(" " + find) + find.size() + 3); str[i] != '\"'; ++i) {
+        pr += str[i];
+    }
+    return pr;
 }
 
 std::vector<std::string> getPosition(std::string &str) {
@@ -25,6 +41,7 @@ std::vector<std::string> getPosition(std::string &str) {
         pos.push_back(str.substr(0, (str.find('>') + 1)));
         str = cut(cut(str, "\n"), "<");
     }
+    // filter 1
     int k = 0;
     for (auto &i : pos) {
         if(i.find("<") == 0)
@@ -32,6 +49,13 @@ std::vector<std::string> getPosition(std::string &str) {
         ++k;
     }
     pos.erase(pos.begin(), (pos.begin() + k));
+    // filter 2
+    std::vector<std::string> pos_filt;
+    for (auto &it : pos) {
+        if (atof(parser(it, "OPEN").c_str()) != 0)
+            pos_filt.push_back(it);
+    }
+    pos = pos_filt;
     return pos;
 }
 
@@ -74,16 +98,8 @@ void getMoexXml(const std::string &date) {
     socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
 }
 
-void parser(const std::string &str, const std::string &find) {
-    for (size_t i = str.find(find + "=\""); str[i] != '\"'; ++i) {
-        std::cout << str[i];
-    }
-    std::cout << std::endl;
-//    return std::make_any<std::string>("Hello World");
-}
-
 int main() {
-//    getMoexXml("2013-12-20");
+    getMoexXml("2022-09-26");
     std::fstream fin("status.xml", std::ios::in);
     std::string s{std::istreambuf_iterator<char>(fin), std::istreambuf_iterator<char>()};
     using namespace std;
@@ -94,12 +110,30 @@ int main() {
 //    cout << s2 << endl;
 
     auto pos = getPosition(s2);
-//    std::map<std::string, std::any> df;
+    std::map<std::string, stock> df;
     for (auto &i : pos) {
-        cout << i << endl;
+        df[parser(i, "SECID")] = {
+                .date = parser(i, "TRADEDATE"),
+                .open = float(atof(parser(i, "OPEN").c_str())),
+                .close = float(atof(parser(i, "CLOSE").c_str())),
+                .low = float(atof(parser(i, "LOW").c_str())),
+                .high = float(atof(parser(i, "HIGH").c_str()))
+        };
     }
-//    cout << pos[3] << endl;
-    parser(pos[0], "BOARDID");
+//    cout << float(atof(parser(pos[0], "CLOSE").c_str())) << endl;
+
+    for (auto &it : df) {
+        cout << it.first << " "
+             //<< it.second.date << " "
+             << it.second.open << " "
+             << it.second.close << " "
+             << it.second.low << " "
+             << it.second.high << endl;
+    }
+
+    system("rm -rf ./status.xml");
+//    cout << pos[0] << endl;
+//    parser(pos[0], "OPEN");
 //    std::regex r("<rows>(\\d+)</rows>");
 //    std::smatch m;
 //
