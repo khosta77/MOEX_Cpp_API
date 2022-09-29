@@ -3,7 +3,7 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <iostream>
 #include <fstream>
-#include <pair>
+#include <map>
 #include <any>
 
 namespace http = boost::beast::http;
@@ -23,9 +23,15 @@ std::vector<std::string> getPosition(std::string &str) {
     std::vector<std::string> pos(SIZE);
     for (size_t i = 0; i < SIZE; ++i) {
         pos.push_back(str.substr(0, (str.find('>') + 1)));
-//        str = cut(str, "\n");
         str = cut(cut(str, "\n"), "<");
     }
+    int k = 0;
+    for (auto &i : pos) {
+        if(i.find("<") == 0)
+            break;
+        ++k;
+    }
+    pos.erase(pos.begin(), (pos.begin() + k));
     return pos;
 }
 
@@ -68,6 +74,13 @@ void getMoexXml(const std::string &date) {
     socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
 }
 
+void parser(const std::string &str, const std::string &find) {
+    for (size_t i = str.find(find + "=\""); str[i] != '\"'; ++i) {
+        std::cout << str[i];
+    }
+    std::cout << std::endl;
+//    return std::make_any<std::string>("Hello World");
+}
 
 int main() {
 //    getMoexXml("2013-12-20");
@@ -81,10 +94,12 @@ int main() {
 //    cout << s2 << endl;
 
     auto pos = getPosition(s2);
-    std::map<std::string, std::any> df;
+//    std::map<std::string, std::any> df;
     for (auto &i : pos) {
         cout << i << endl;
     }
+//    cout << pos[3] << endl;
+    parser(pos[0], "BOARDID");
 //    std::regex r("<rows>(\\d+)</rows>");
 //    std::smatch m;
 //
