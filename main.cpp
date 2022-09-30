@@ -11,6 +11,13 @@ namespace http = boost::beast::http;
 // http://iss.moex.com/iss/history/engines/stock/markets/shares/boa
 //rds/tqbr/securities.xml?date=2013-12-20
 
+/** // https://iss.moex.com/iss/history/engines/stock/markets/shares/boards/TQBR/securities/RUAL.xml?from=2022-09-29&till=2022-09-29
+ * Вот эта ссылка позволит получить к открытии закритию рус акции в определенную дату
+ * \param history
+ *
+ * \param
+ * */
+
 struct stock {
     std::string date;
     float open;
