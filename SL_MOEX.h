@@ -1,7 +1,3 @@
-//
-// Created by stepan on 10/1/22.
-//
-
 #ifndef MOEXPARSER_SL_MOEX_H
 #define MOEXPARSER_SL_MOEX_H
 
@@ -11,9 +7,8 @@
 #include <boost/variant.hpp>
 #include <iostream>
 #include <fstream>
-#include <vector>
-#include <string>
 
+#include "utilities.h"
 
 const std::vector<std::string> IMOEX = {
         "AFKS", "AFLT", "ALRS", "CBOM", "CHMF", "DSKY"
@@ -23,49 +18,9 @@ namespace http = boost::beast::http;
 class MOEX_parser {
     const std::string HOST = "iss.moex.com";
 
-    std::string cut(const std::string &str, const char* find) {
-        std::string::size_type pos = str.find(find);
-        if (pos != std::string::npos)
-            return str.substr(pos);
-        return std::string();
-    }
-
-    std::string parser(const std::string &str, const std::string &find) {
-        std::string pr;
-        for (size_t i = (str.find(" " + find) + find.size() + 3); str[i] != '\"'; ++i) {
-            pr += str[i];
-        }
-        return pr;
-    }
-
-    std::vector<std::string> getPosition(std::string &str) {
-        const auto SIZE = std::count(str.begin(), str.end(), '>');
-        std::vector<std::string> pos(SIZE);
-        for (size_t i = 0; i < SIZE; ++i) {
-            pos.push_back(str.substr(0, (str.find('>') + 1)));
-            str = cut(cut(str, "\n"), "<");
-        }
-        // filter 1
-        int k = 0;
-        for (auto &i : pos) {
-            if(i.find("<") == 0)
-                break;
-            ++k;
-        }
-        pos.erase(pos.begin(), (pos.begin() + k));
-        // filter 2
-        std::vector<std::string> pos_filt;
-        for (auto &it : pos) {
-            if (atof(parser(it, "OPEN").c_str()) != 0)
-                pos_filt.push_back(it);
-        }
-        pos = pos_filt;
-        return pos;
-    }
-
      void getMoexXml(/*const std::string &date*/) {
         const std::string host = HOST;
-        const std::string target = "/iss/history/engines/stock/markets/shares/boards/TQBR/securities/GAZP.xml?from=2022-09-29&till=2022-09-29&iss.meta=off";
+        const std::string target = "/iss/history/engines/stock/markets/shares/boards/TQBR/securities/RUAL.xml?from=2022-09-29&till=2022-09-29&iss.meta=off";
                 // "/iss/history/engines/stock/markets/shares/boards/tqbr/securities.xml?date=" + date;
 
         // I/O контекст, необходимый для всех I/O операций
@@ -136,42 +91,20 @@ public:
         getMoexXml();
         std::fstream fin("status.xml", std::ios::in);
         std::string s{std::istreambuf_iterator<char>(fin), std::istreambuf_iterator<char>()};
-//        system("rm -rf ./status.xml");
+//        system("rm -rf ./status.xml");  // Команда нужна для очистки системы от ненужного файла
         using namespace std;
 
-//    s.substr(s.find("<"));
         auto s2 = cut(s, "<row ");
         s2 = s2.substr(0, s2.find("</rows>"));
-//    cout << s2 << endl;
 
-        auto pos = getPosition(s2);
-        stock_object so(parser(pos[0], "TRADEDATE"),
-                        float(atof(parser(pos[0], "OPEN").c_str())),
-                        float(atof(parser(pos[0], "CLOSE").c_str())),
-                        float(atof(parser(pos[0], "LOW").c_str())),
-                        float(atof(parser(pos[0], "HIGH").c_str()))
+        auto pos = position::get(s2);
+        stock_object so(parser_in_data(pos[0], "TRADEDATE"),
+                        float(atof(parser_in_data(pos[0], "OPEN").c_str())),
+                        float(atof(parser_in_data(pos[0], "CLOSE").c_str())),
+                        float(atof(parser_in_data(pos[0], "LOW").c_str())),
+                        float(atof(parser_in_data(pos[0], "HIGH").c_str()))
                         );
         return so;
-//        std::map <std::string, stock> df;
-//        for (auto &i: pos) {
-//            df[parser(i, "SECID")] = {
-//                    .date = parser(i, "TRADEDATE"),
-//                    .open = float(atof(parser(i, "OPEN").c_str())),
-//                    .close = float(atof(parser(i, "CLOSE").c_str())),
-//                    .low = float(atof(parser(i, "LOW").c_str())),
-//                    .high = float(atof(parser(i, "HIGH").c_str()))
-//            };
-//        }
-//    cout << float(atof(parser(pos[0], "CLOSE").c_str())) << endl;
-
-//        for (auto &it: df) {
-//            cout << it.first << " "
-//                 //<< it.second.date << " "
-//                 << it.second.open << " "
-//                 << it.second.close << " "
-//                 << it.second.low << " "
-//                 << it.second.high << endl;
-//        }
     }
 };
 
