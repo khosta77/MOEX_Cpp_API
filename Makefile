@@ -1,7 +1,8 @@
 TARGET=./main
 CC=g++
 SRCS=\
-	./main.cpp
+	./main.cpp \
+	./SL_MOEX.h
 LIBS=\
     -lboost_system \
     -pthread
