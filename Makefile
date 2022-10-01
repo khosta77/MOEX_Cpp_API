@@ -4,7 +4,8 @@ SRCS=\
 	./main.cpp \
 	./SL_MOEX.h \
 	./utilities.h \
-	./utilities.cpp
+	./utilities.cpp \
+	./candle.h
 LIBS=\
     -lboost_system \
     -pthread
