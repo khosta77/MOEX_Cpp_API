@@ -58,34 +58,14 @@ class MOEX_parser {
         socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
     }
 
-    class stock_object {
-        std::string date;
-        float open;
-        float close;
-        float low;
-        float high;
-    public:
-        stock_object(const std::string &DATE, const float &OPEN, const float &CLOSE, const float &LOW, const float &HIGH) :
-        date(DATE), open(OPEN), close(CLOSE), low(LOW), high(HIGH) {}
-        ~stock_object() {
-            date.clear();
-        }
 
-        boost::variant<float, std::string>  operator[] (const std::string &parameter){
-            if (parameter == "DATE") {
-                return this->date;
-            } else {
-                return this->close;
-            }
-        }
-
-    };
+#include "candle.h"
 
 public:
     MOEX_parser() = default;
     ~MOEX_parser() = default;
 
-    stock_object parser(const std::string &secid) {
+    Candle parser(const std::string &secid) {
         // Вот тут проверка на акцию
 
         getMoexXml();
@@ -98,13 +78,13 @@ public:
         s2 = s2.substr(0, s2.find("</rows>"));
 
         auto pos = position::get(s2);
-        stock_object so(parser_in_data(pos[0], "TRADEDATE"),
-                        float(atof(parser_in_data(pos[0], "OPEN").c_str())),
-                        float(atof(parser_in_data(pos[0], "CLOSE").c_str())),
-                        float(atof(parser_in_data(pos[0], "LOW").c_str())),
-                        float(atof(parser_in_data(pos[0], "HIGH").c_str()))
-                        );
-        return so;
+        Candle candle(parser_in_data(pos[0], "TRADEDATE"),
+                  float(atof(parser_in_data(pos[0], "OPEN").c_str())),
+                  float(atof(parser_in_data(pos[0], "CLOSE").c_str())),
+                  float(atof(parser_in_data(pos[0], "LOW").c_str())),
+                  float(atof(parser_in_data(pos[0], "HIGH").c_str()))
+                  );
+        return candle;
     }
 };
 

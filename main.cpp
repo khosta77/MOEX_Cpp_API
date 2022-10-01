@@ -18,6 +18,6 @@ using namespace std;
 int main() {
     MOEX_parser moex;
     auto df = moex.parser("GAZP");
-    cout << df["DATE"] << " " << df["asd"] << endl;
+    cout << df["DATE"] << " " << df["OPEN"] << endl;
     return 0;
 }
