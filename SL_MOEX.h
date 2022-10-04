@@ -7,7 +7,7 @@
 #include <boost/variant.hpp>
 #include <iostream>
 #include <fstream>
-
+#include "Date.h"
 #include "utilities.h"
 
 const std::vector<std::string> IMOEX = {
@@ -18,9 +18,14 @@ namespace http = boost::beast::http;
 class MOEX_parser {
     const std::string HOST = "iss.moex.com";
 
-     void getMoexXml(/*const std::string &date*/) {
+     void getMoexXml(const std::string &SECID, Day first = Day(), Day last = Day()) {
+        if (first == Day()) {
+            first.prev();
+        }
         const std::string host = HOST;
-        const std::string target = "/iss/history/engines/stock/markets/shares/boards/TQBR/securities/RUAL.xml?from=2022-09-29&till=2022-09-29&iss.meta=off";
+        const std::string target = "/iss/history/engines/stock/markets/shares/boards/TQBR/securities/" + \
+                                   SECID + ".xml?from=" + first.date() + \
+                                   "&till=" + last.date() + "&iss.meta=off";
                 // "/iss/history/engines/stock/markets/shares/boards/tqbr/securities.xml?date=" + date;
 
         // I/O контекст, необходимый для всех I/O операций
@@ -68,7 +73,7 @@ public:
     Candle parser(const std::string &secid) {
         // Вот тут проверка на акцию
 
-        getMoexXml();
+        getMoexXml(secid);
         std::fstream fin("status.xml", std::ios::in);
         std::string s{std::istreambuf_iterator<char>(fin), std::istreambuf_iterator<char>()};
 //        system("rm -rf ./status.xml");  // Команда нужна для очистки системы от ненужного файла
