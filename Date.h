@@ -68,27 +68,28 @@ struct Day {
         }
     }
 
-#if 0
-/* 2022-10-04 18:46
- * // TODO: сделать так чтобы было можно идти и к обратному числу
- * */
     void prev() {
-        day = std::to_string((atoi(day.c_str()) - 1));
-        try {
-            Day test(year, month, day);
-        } catch (Error &e) {
-            day = "1";
-            month = std::to_string((atoi(month.c_str()) + 1));
-            try {
-                Day test(year, month, day);
-            } catch (Error &e) {
-                year = std::to_string((atoi(year.c_str()) + 1));
-                month = "1";
-                day = "1";
+        auto d = (atoi(day.c_str()) - 1);
+        if (d == 0) {
+            auto m = (atoi(month.c_str()) - 1);
+            if (m == 0) {
+                year = std::to_string((atoi(year.c_str()) - 1));
+                month = "12";
+                day = "31";
+                return;
+            }
+            month = std::to_string(m);
+            for (int i = 31; i > 27; --i) {
+                day = std::to_string(i);
+                try {
+                    Day test(year, month, day);
+                    return;
+                } catch (Error &e) {}
+
             }
         }
+        day = std::to_string(d);
     }
-#endif
 };
 
 struct Today : Day {
