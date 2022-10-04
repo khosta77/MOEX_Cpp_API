@@ -90,6 +90,18 @@ struct Day {
         }
         day = std::to_string(d);
     }
+
+    bool operator==(const Day& rh) {
+        if (this->day != rh.day) {
+            return false;
+        } else if (this->month != rh.month) {
+            return false;
+        } else if (this->year != rh.year) {
+            return false;
+        } else {
+            return true;
+        }
+    }
 };
 
 struct Today : Day {
