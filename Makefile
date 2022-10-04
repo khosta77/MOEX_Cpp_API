@@ -5,7 +5,8 @@ SRCS=\
 	./SL_MOEX.h \
 	./utilities.h \
 	./utilities.cpp \
-	./candle.h
+	./candle.h \
+	./Date.h
 LIBS=\
     -lboost_system \
     -pthread
