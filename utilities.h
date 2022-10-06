@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <fstream>
 
 /** \brief Обрезает \param str до определенного \param find символа/объекта
  * \return возращается строка после параметра find
@@ -20,5 +21,7 @@ private:
     static void filter_whitespace(std::vector<std::string> &pos);
     static void filter_whitespace_in_cell(std::vector<std::string> &pos);
 };
+
+void saveas(const std::string &date, const std::string &fn);
 
 #endif //MOEXPARSER_UTILITIES_H
