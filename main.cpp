@@ -1,5 +1,5 @@
 #include <iostream>
-#include "SL_MOEX.h"
+//#include "SL_MOEX.h"
 
 using namespace std;
 
@@ -14,10 +14,13 @@ using namespace std;
 // * \param
 // * */
 
+#include "Date.h"
 
 int main() {
-    MOEX_parser moex;
-    auto df = moex.parser("GAZP");
-    cout << df["DATE"] << " " << df["OPEN"] << endl;
+    Date d(2022, 10, 10);
+    cout << d.date() << endl;
+//    MOEX_parser moex;
+//    auto df = moex.parser("GAZP");
+//    cout << df["DATE"] << " " << df["OPEN"] << endl;
     return 0;
 }

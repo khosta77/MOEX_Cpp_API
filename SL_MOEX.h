@@ -19,7 +19,7 @@ namespace http = boost::beast::http;
 class MOEX_parser {
      const std::string HOST = "iss.moex.com";
 
-     std::string getMoexXml(const std::string &SECID, Day first = Day(), Day last = Day()) {
+     std::string getMoexXml(const std::string &SECID, Date first = Day(), Date last = Day()) {
          if (first == Day()) {
              first.prev();
          }

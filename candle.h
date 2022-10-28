@@ -6,10 +6,11 @@
 #include <vector>
 #include <algorithm>
 #include <map>
+#include "Date.h"
 
 class Candle {
-    std::string date;
-    std::map<std::string, float> df_candle;
+    Date date;
+    std::map<const char*, float> df_candle;
 
     class _no_element : public std::exception {
         std::string error;
@@ -31,8 +32,9 @@ public:
         df_candle["LOW"] = LOW;
         df_candle["HIGH"] = HIGH;
     }
+
     ~Candle() {
-        date.clear();
+        df_candle.clear();
     }
 
     boost::variant<float, std::string>  operator[] (const std::string &parameter){
