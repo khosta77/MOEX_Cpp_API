@@ -19,6 +19,15 @@ public:
 
 };
 
+/** \class Candle
+ * \param date - дата свечи
+ *     DATA  - Дата свечи
+ * \param df_candle - тело свечи
+ *     OPEN  - Цена открытия свечи
+ *     CLOSE - Цена закрытия свечи
+ *     LOW   - Минимальная цена в свече
+ *     HIGH  - Маскимальная цена в свече
+ * */
 class Candle {
     Date date;
     std::map<const char*, float> df_candle;
