@@ -80,7 +80,7 @@ struct Date {
     inline const int status() {  return this->working_day; }
 
     bool operator==(const Date &rh) {
-        return (this->day == rh.day && this->month == rh.month && this->year == rh.year) ? false : true;
+        return (this->day == rh.day && this->month == rh.month && this->year == rh.year) ? true : false;
     }
 
     bool operator!=(const Data &rh) {  return !(*this == rh); }
