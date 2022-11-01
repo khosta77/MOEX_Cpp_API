@@ -59,7 +59,7 @@ class RtMOEX {
         namespace http = boost::beast::http;
 
         const std::string host = HOST;
-        const std::string target = get_target_form(SECID, first, last)
+        const std::string target = get_target_form(SECID, first, last);
 
         // I/O контекст, необходимый для всех I/O операций
         boost::asio::io_context ioc;
@@ -107,7 +107,7 @@ public:
     RtMOEX() = default;
     ~RtMOEX() = default;
 
-    Candle parser(const std::string &secid) {
+    boost::variant<Candle, Candles> parser(const std::string &secid, Date first = Date(), Date last = Date()) {
         // Вот тут проверка на акцию
 
         auto df = getMoexXml(secid);
