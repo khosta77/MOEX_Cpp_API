@@ -11,6 +11,7 @@
 #include "Date.h"
 #include "utilities.h"
 
+#define MRK "=========================================================================================================="
 //const std::vector<std::string> IMOEX = {
 //        "AFKS", "AFLT", "ALRS", "CBOM", "CHMF", "DSKY"
 //};  // https://ru.tradingview.com/symbols/MOEX-IMOEX/components/
@@ -50,7 +51,7 @@ protected:
             target += "from=" + first.date();
             target += "&till=" + last.date();
         }
-        saveas(target, "target.txt");
+        saveas(target, "target.txt");  // ТЕСТЫ ССЫЛКИ
         return target;
     }
 
@@ -113,6 +114,9 @@ public:
         // Вот тут проверка на акцию
 
         auto df = getMoexXml(secid, first, last);
+
+        saveas(df + MRK, "moexXML.txt"); // ТЕСТ ОТВЕТА
+
         auto parsed_df = dividerRows(df);
 //        saveas(df, "status.xml");
         using namespace std;
