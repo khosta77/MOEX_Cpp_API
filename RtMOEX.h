@@ -16,19 +16,20 @@
 //};  // https://ru.tradingview.com/symbols/MOEX-IMOEX/components/
 
 class RtMOEX {
+protected:
     const std::string HOST = "iss.moex.com";  // ссылка на MOEX
 
-    [[maybe_unused]] std::string history;  // История/настоящие время
-    [[maybe_unused]] std::string engines;  // Доступные торговые системы
-    [[maybe_unused]] std::string markets;  // Рынки торговой системы
-    [[maybe_unused]] std::string sessions;  // Список сессий доступных в итогах торгов. Только для фондового рынка!
-    [[maybe_unused]] std::string boards;  // Режимы торгов рынка
+    std::string history;  // История/настоящие время
+    std::string engine;  // Доступные торговые системы
+    std::string market;  // Рынки торговой системы
+    std::string session;  // Список сессий доступных в итогах торгов. Только для фондового рынка!
+    std::string board;  // Режимы торгов рынка
 
-    virtual inline const std::string histoty_status() const {  return this->history; }
-    virtual inline const std::string egnines_status() const {  return this->engines; }
-    virtual inline const std::string markets_status() const {  return this->markets; }
-    virtual inline const std::string sessions_status() const {  return this->sessions; }
-    virtual inline const std::string boards_status() const {  return this->boards; }
+    [[nodiscard]] virtual inline const std::string histoty_status() const {  return this->history; }
+    [[nodiscard]] virtual inline const std::string egnines_status() const {  return this->engine; }
+    [[nodiscard]] virtual inline const std::string markets_status() const {  return this->market; }
+    [[nodiscard]] virtual inline const std::string sessions_status() const {  return this->session; }
+    [[nodiscard]] virtual inline const std::string boards_status() const {  return this->board; }
 
     /** \brief - метод формирует запрос к серверу, подставляет нужные параметры.
      * \param SECID - акция
@@ -38,23 +39,24 @@ class RtMOEX {
     inline const std::string get_target_form(const std::string &SECID, Date first, Date last) {
         std::string target;
         target += "/iss" + histoty_status();
-        target += "/engines" + egnines_status();
-        target += "/markets" + markets_status();
+        target += "/engines/" + egnines_status();
+        target += "/markets/" + markets_status();
         if (!histoty_status().empty())
-            target += "/sessions" + sessions_status();
-        target += "/boards" + boards_status();
-        target += "/securities" + SECID + ".xml?iss.meta=off&";
+            target += "/sessions/" + sessions_status();
+        target += "/boards/" + boards_status();
+        target += "/securities/" + SECID + ".xml?iss.meta=off&";
         target += (histoty_status().empty()) ? "iss.only=marketdata&" : "iss.only=history&";
         if (!histoty_status().empty()) {
             target += "from=" + first.date();
             target += "&till=" + last.date();
         }
+        saveas(target, "target.txt");
         return target;
     }
 
     std::string getMoexXml(const std::string &SECID, Date first = Date(), Date last = Date()) {
-        if (first == Day())
-            first.prev();
+        if (first == Date())
+            --first;
 
         namespace http = boost::beast::http;
 
@@ -110,7 +112,7 @@ public:
     boost::variant<Candle, Candles> parser(const std::string &secid, Date first = Date(), Date last = Date()) {
         // Вот тут проверка на акцию
 
-        auto df = getMoexXml(secid);
+        auto df = getMoexXml(secid, first, last);
         auto parsed_df = dividerRows(df);
 //        saveas(df, "status.xml");
         using namespace std;
