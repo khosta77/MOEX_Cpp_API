@@ -47,7 +47,7 @@ void position::filter_whitespace_in_cell(std::vector<std::string> &pos) {
 }
 
 void saveas(const std::string &date, const std::string &fn) {
-    std::fstream fout(fn.c_str(), std::ios::out);
+    std::fstream fout(fn.c_str(), std::ios::out | std::ios::app);
     if (fout.is_open()) {
         fout << date << std::endl;
     }
