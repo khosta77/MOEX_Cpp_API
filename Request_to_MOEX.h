@@ -16,19 +16,50 @@
 //};  // https://ru.tradingview.com/symbols/MOEX-IMOEX/components/
 
 namespace http = boost::beast::http;
-class MOEX_parser {
+class RtMOEX {
 
-    const std::string HOST = "iss.moex.com";
+    const std::string HOST = "iss.moex.com";  // ссылка на MOEX
 
-    std::string getMoexXml(const std::string &SECID, Date first = Day(), Date last = Day()) {
+    [[maybe_unused]] std::string history;  // История/настоящие время
+    [[maybe_unused]] std::string engines;  // Доступные торговые системы
+    [[maybe_unused]] std::string markets;  // Рынки торговой системы
+    [[maybe_unused]] std::string sessions;  // Список сессий доступных в итогах торгов. Только для фондового рынка!
+    [[maybe_unused]] std::string boards;  // Режимы торгов рынка
+
+    virtual inline const std::string histoty_status() const {  return this->history; }
+    virtual inline const std::string egnines_status() const {  return this->engines; }
+    virtual inline const std::string markets_status() const {  return this->markets; }
+    virtual inline const std::string sessions_status() const {  return this->sessions; }
+    virtual inline const std::string boards_status() const {  return this->boards; }
+
+    /** \brief - метод формирует запрос к серверу, подставляет нужные параметры.
+     * \param SECID - акция
+     * \param first - первая дата
+     * \param last - вторая дата
+     * */
+    inline const std::string get_target_form(const std::string &SECID, Date first, Date last) {
+        std::string target;
+        target += "/iss" + histoty_status();
+        target += "/engines" + egnines_status();
+        target += "/markets" + markets_status();
+        if (!histoty_status().empty())
+            target += "/sessions" + sessions_status();
+        target += "/boards" + boards_status();
+        target += "/securities" + SECID + ".xml?iss.meta=off&";
+        target += (histoty_status().empty()) ? "iss.only=marketdata&" : "iss.only=history&";
+        if (!histoty_status().empty()) {
+            target += "from=" + first.date();
+            target += "&till=" + last.date();
+        }
+        return target;
+    }
+
+    std::string getMoexXml(const std::string &SECID, Date first = Date(), Date last = Date()) {
         if (first == Day()) {
             first.prev();
         }
         const std::string host = HOST;
-        const std::string target = "/iss/history/engines/stock/markets/shares/boards/TQBR/securities/" + \
-                                   SECID + ".xml?from=" + first.date() + \
-                                   "&till=" + last.date() + "&iss.meta=off";
-        // "/iss/history/engines/stock/markets/shares/boards/tqbr/securities.xml?date=" + date;
+        const std::string target = get_target_form(SECID, first, last)
 
         // I/O контекст, необходимый для всех I/O операций
         boost::asio::io_context ioc;
