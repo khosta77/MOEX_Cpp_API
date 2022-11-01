@@ -5,19 +5,17 @@
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/variant.hpp>
+#include <boost/property_tree/detail/rapidxml.hpp>
 #include <iostream>
 #include <fstream>
 #include "Date.h"
 #include "utilities.h"
-#include <boost/property_tree/detail/rapidxml.hpp>
 
 //const std::vector<std::string> IMOEX = {
 //        "AFKS", "AFLT", "ALRS", "CBOM", "CHMF", "DSKY"
 //};  // https://ru.tradingview.com/symbols/MOEX-IMOEX/components/
 
-namespace http = boost::beast::http;
 class RtMOEX {
-
     const std::string HOST = "iss.moex.com";  // ссылка на MOEX
 
     [[maybe_unused]] std::string history;  // История/настоящие время
@@ -55,9 +53,11 @@ class RtMOEX {
     }
 
     std::string getMoexXml(const std::string &SECID, Date first = Date(), Date last = Date()) {
-        if (first == Day()) {
+        if (first == Day())
             first.prev();
-        }
+
+        namespace http = boost::beast::http;
+
         const std::string host = HOST;
         const std::string target = get_target_form(SECID, first, last)
 
@@ -97,7 +97,6 @@ class RtMOEX {
     std::vector<std::string> dividerRows(const std::string &df) {
         std::string s = cut(df, "<row ");
         s = s.substr(0, s.find("</rows>"));
-//         auto new_df = position::get(s);
         return position::get(s);
     }
 
@@ -105,8 +104,8 @@ class RtMOEX {
 #include "Candle.h"
 
 public:
-    MOEX_parser() = default;
-    ~MOEX_parser() = default;
+    RtMOEX() = default;
+    ~RtMOEX() = default;
 
     Candle parser(const std::string &secid) {
         // Вот тут проверка на акцию
