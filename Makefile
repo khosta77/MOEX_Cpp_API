@@ -2,10 +2,11 @@ TARGET=./main
 CC=g++
 SRCS=\
 	./main.cpp \
-	./SL_MOEX.h \
+	./RtMOEX.h \
+	./HMOEX.h \
 	./utilities.h \
 	./utilities.cpp \
-	./candle.h \
+	./Candle.h \
 	./Date.h
 LIBS=\
     -lboost_system \
