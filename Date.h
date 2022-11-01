@@ -83,23 +83,23 @@ struct Date {
         return (this->day == rh.day && this->month == rh.month && this->year == rh.year) ? true : false;
     }
 
-    bool operator!=(const Data &rh) {  return !(*this == rh); }
+    bool operator!=(const Date &rh) {  return !(*this == rh); }
 
-    Data operator++() {
+    Date operator++() {
         next();
         return *this;
     }
-    Data operator++(int) {
-        Data b = this;
+    Date operator++(int) {
+        Date b = *this;
         next();
         return b;
     }
-    Data operator--() {
+    Date operator--() {
         prev();
         return *this;
     }
-    Data operator--(int) {
-        Date b = this;
+    Date operator--(int) {
+        Date b = *this;
         prev();
         return b;
     }
