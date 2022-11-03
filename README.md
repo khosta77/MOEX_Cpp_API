@@ -1,3 +1,8 @@
-# MOEXparser
+# MOEX_Cpp_API
 
-g++ -lboost_system -pthread main.cpp -o main; ./main
+Бибилотека для взаимодействия с API Московской биржи, с помощью С++. 
+
+## Сборка
+
+## Пример
+
