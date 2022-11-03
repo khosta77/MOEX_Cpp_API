@@ -17,7 +17,7 @@ std::string parser_in_data(const std::string &str, const std::string &find) {
 
 std::vector<std::string> position::get(std::string &str, const bool &fwsic) {
     std::vector<std::string> pos;
-    for (size_t i = 0; i < std::count(str.begin(), str.end(), '>'); ++i) {
+    for (size_t i = 0, count = std::count(str.begin(), str.end(), '>'); i < count; ++i) {
         pos.push_back(str.substr(0, (str.find('>') + 1)));
         str = cut(cut(str, "\n"), "<");
     }
