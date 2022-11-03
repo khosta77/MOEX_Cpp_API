@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <chrono>
 #include <ctime>
+#include <iostream>
 
 class The_error_of_the_existence_of_the_day : std::exception {
 public:
@@ -41,19 +42,9 @@ struct Date {
     }
 
     Date(const std::string &dt) {
-        std::string buffer;
-        buffer = (dt[0] + dt[1] + dt[2] + dt[3]);
-        year = atoi(buffer.c_str());
-        month = 0; day = 0;
-        buffer = "";
-        for(size_t i = 5; i < dt.size(); ++i) {
-            if (dt[i] == '-') {
-                month = (month != 0) ? month : atoi(buffer.c_str());
-                day = atoi(buffer.c_str());
-                buffer = "";
-            } else
-                buffer += dt[i];
-        }
+        year = atoi(dt.substr(0, 4).c_str());
+        month = atoi(dt.substr(5, 2).c_str());
+        day = atoi(dt.substr(8, 2).c_str());
         working_day = 0;
         [[maybe_unused]] Date test(year, month, day);
     }
