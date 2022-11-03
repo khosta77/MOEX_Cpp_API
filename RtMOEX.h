@@ -11,7 +11,7 @@
 #include "Date.h"
 #include "utilities.h"
 
-#define MRK "=========================================================================================================="
+#define MRK "\n=========================================================================================================="
 //const std::vector<std::string> IMOEX = {
 //        "AFKS", "AFLT", "ALRS", "CBOM", "CHMF", "DSKY"
 //};  // https://ru.tradingview.com/symbols/MOEX-IMOEX/components/
@@ -51,11 +51,10 @@ protected:
             target += "from=" + first.date();
             target += "&till=" + last.date();
         }
-        saveas(target, "target.txt");  // ТЕСТЫ ССЫЛКИ
         return target;
     }
 
-    std::string getMoexXml(const std::string &SECID, Date first = Date(), Date last = Date()) {
+    std::string get_request_to_MOEX_in_the_format_xml(const std::string &SECID, Date first = Date(), Date last = Date()) {
         if (first == Date())
             --first;
 
@@ -111,23 +110,32 @@ public:
     ~RtMOEX() = default;
 
     boost::variant<Candle, Candles> parser(const std::string &secid, Date first = Date(), Date last = Date()) {
-        // Вот тут проверка на акцию
-
-        auto df = getMoexXml(secid, first, last);
-
-        saveas(df + MRK, "moexXML.txt"); // ТЕСТ ОТВЕТА
-
+        /*
+         * Делаем get-запрос к серверу, чтобы получить информаци об акции. Информаци получаем ввиде единой строки,
+         * в ней будет как лишняя, так и нужная информация.
+         * */
+        std::string df = get_request_to_MOEX_in_the_format_xml(secid, first, last);
+//        saveas(df + MRK, "moexXML.txt"); // ТЕСТ ОТВЕТА
+        /*
+         *
+         * */
         auto parsed_df = dividerRows(df);
+        for (auto it : parsed_df)
+            saveas(it, "parsed_df_xml.txt");
+//        std::cout << parsed_df.size() << std::endl;
+
+
+        Candle candle;
 //        saveas(df, "status.xml");
-        using namespace std;
+//        using namespace std;
 //        Candle candle;
 //        system("rm -rf ./status.xml");  // Команда нужна для очистки системы от ненужного файла
-        Candle candle(parser_in_data(parsed_df[0], "TRADEDATE"),
-                      float(atof(parser_in_data(parsed_df[0], "OPEN").c_str())),
-                      float(atof(parser_in_data(parsed_df[0], "CLOSE").c_str())),
-                      float(atof(parser_in_data(parsed_df[0], "LOW").c_str())),
-                      float(atof(parser_in_data(parsed_df[0], "HIGH").c_str()))
-        );
+//        Candle candle(parser_in_data(parsed_df[0], "TRADEDATE"),
+//                      float(atof(parser_in_data(parsed_df[0], "OPEN").c_str())),
+//                      float(atof(parser_in_data(parsed_df[0], "CLOSE").c_str())),
+//                      float(atof(parser_in_data(parsed_df[0], "LOW").c_str())),
+//                      float(atof(parser_in_data(parsed_df[0], "HIGH").c_str()))
+//        );
         return candle;
     }
 };
