@@ -46,6 +46,8 @@ public:
         df_candle = cl.df_candle;
     }
 
+    Candle() = default;
+
     Candle& operator=(const Candle &cl) {
         if (*this == cl)
             return *this;
