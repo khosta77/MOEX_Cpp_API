@@ -44,11 +44,12 @@ protected:
             target += "/sessions/" + sessions_status();
         target += "/boards/" + boards_status();
         target += "/securities/" + SECID + ".xml?iss.meta=off&";
-        target += (histoty_status().empty()) ? "iss.only=marketdata&" : "iss.only=history&";
+        target += (histoty_status().empty()) ? "iss.only=marketdata" : "iss.only=history";
         if (!histoty_status().empty()) {
-            target += "from=" + first.date();
+            target += "&from=" + first.date();
             target += "&till=" + last.date();
         }
+        saveas(target, "target.txt");
         return target;
     }
 
@@ -107,7 +108,7 @@ public:
     RtMOEX() = default;
     ~RtMOEX() = default;
 
-    std::vector<Candle> parser(const std::string &secid, Date first = Date(), Date last = Date()) {
+    boost::variant<std::vector<Candle>, Candle> parser(const std::string &secid, Date first = Date(), Date last = Date()) {
         /*
          * Делаем get-запрос к серверу, чтобы получить информаци об акции. Информаци получаем ввиде единой строки,
          * в ней будет как лишняя, так и нужная информация.
@@ -122,16 +123,25 @@ public:
         /*
          * Получаем массив свечей, распарсив строку
          * */
-        std::vector<Candle> cndls;
-        for (auto it : parsed_df) {
-            cndls.push_back(Candle(parser_in_data(it, "TRADEDATE"),
-                      float(std::atof(parser_in_data(it, "OPEN").c_str())),
-                      float(std::atof(parser_in_data(it, "CLOSE").c_str())),
-                      float(std::atof(parser_in_data(it, "LOW").c_str())),
-                      float(std::atof(parser_in_data(it, "HIGH").c_str()))));
+        if (!histoty_status().empty()) {
+            std::vector<Candle> cndls;
+            for (auto it : parsed_df) {
+                cndls.push_back(Candle(parser_in_data(it, "TRADEDATE"),
+                                       float(std::atof(parser_in_data(it, "OPEN").c_str())),
+                                       float(std::atof(parser_in_data(it, "CLOSE").c_str())),
+                                       float(std::atof(parser_in_data(it, "LOW").c_str())),
+                                       float(std::atof(parser_in_data(it, "HIGH").c_str()))));
+            }
+
+            return cndls;
         }
-    
-        return cndls;
+        
+        Candle cndl(Date().date(),
+                    float(std::atof(parser_in_data(parsed_df[0], "OPEN").c_str())),
+                    float(std::atof(parser_in_data(parsed_df[0], "CLOSE").c_str())),
+                    float(std::atof(parser_in_data(parsed_df[0], "LOW").c_str())),
+                    float(std::atof(parser_in_data(parsed_df[0], "HIGH").c_str())));
+        return cndl;
     }
 };
 
