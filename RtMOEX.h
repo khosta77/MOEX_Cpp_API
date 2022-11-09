@@ -1,6 +1,7 @@
 #ifndef MOEXPARSER_REQUEST_TO_MOEX_H
 #define MOEXPARSER_REQUEST_TO_MOEX_H
 
+
 #include <boost/beast.hpp>
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
@@ -8,6 +9,7 @@
 #include <boost/property_tree/detail/rapidxml.hpp>
 #include <iostream>
 #include <fstream>
+#include <string>
 #include "Date.h"
 #include "utilities.h"
 
@@ -106,8 +108,8 @@ protected:
 #include "Candle.h"
 
 public:
-    RtMOEX() = default;
-    ~RtMOEX() = default;
+    RtMOEX() {};
+    ~RtMOEX() {};
 
     boost::variant<Candle, Candles> parser(const std::string &secid, Date first = Date(), Date last = Date()) {
         /*
