@@ -76,6 +76,5 @@ public:
     }
 };
 
-typedef std::vector<Candle> Candles;
 
 #endif //MOEXPARSER_CANDLE_H

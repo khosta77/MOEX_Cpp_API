@@ -13,10 +13,6 @@
 #include "Date.h"
 #include "utilities.h"
 
-#define MRK "\n=========================================================================================================="
-//const std::vector<std::string> IMOEX = {
-//        "AFKS", "AFLT", "ALRS", "CBOM", "CHMF", "DSKY"
-//};  // https://ru.tradingview.com/symbols/MOEX-IMOEX/components/
 
 class RtMOEX {
 protected:
@@ -98,7 +94,7 @@ protected:
         return res_str;
     }
 
-    std::vector<std::string> dividerRows(const std::string &df) {
+    std::vector<std::string> split_the_request_into_rows(const std::string &df) {
         std::string s = cut(df, "<row ");
         s = s.substr(0, s.find("</rows>"));
         return position::get(s);
@@ -108,37 +104,34 @@ protected:
 #include "Candle.h"
 
 public:
-    RtMOEX() {};
-    ~RtMOEX() {};
+    RtMOEX() = default;
+    ~RtMOEX() = default;
 
-    boost::variant<Candle, Candles> parser(const std::string &secid, Date first = Date(), Date last = Date()) {
+    std::vector<Candle> parser(const std::string &secid, Date first = Date(), Date last = Date()) {
         /*
          * Делаем get-запрос к серверу, чтобы получить информаци об акции. Информаци получаем ввиде единой строки,
          * в ней будет как лишняя, так и нужная информация.
          * */
         std::string df = get_request_to_MOEX_in_the_format_xml(secid, first, last);
-//        saveas(df + MRK, "moexXML.txt"); // ТЕСТ ОТВЕТА
+
         /*
-         *
+         * Очищаем полученный запрос от лишней информации и разбиваем его на строки
          * */
-        auto parsed_df = dividerRows(df);
-        for (auto it : parsed_df)
-            saveas(it, "parsed_df_xml.txt");
-//        std::cout << parsed_df.size() << std::endl;
+        std::vector<std::string> parsed_df = split_the_request_into_rows(df);
 
-
-        Candle candle;
-//        saveas(df, "status.xml");
-//        using namespace std;
-//        Candle candle;
-//        system("rm -rf ./status.xml");  // Команда нужна для очистки системы от ненужного файла
-//        Candle candle(parser_in_data(parsed_df[0], "TRADEDATE"),
-//                      float(atof(parser_in_data(parsed_df[0], "OPEN").c_str())),
-//                      float(atof(parser_in_data(parsed_df[0], "CLOSE").c_str())),
-//                      float(atof(parser_in_data(parsed_df[0], "LOW").c_str())),
-//                      float(atof(parser_in_data(parsed_df[0], "HIGH").c_str()))
-//        );
-        return candle;
+        /*
+         * Получаем массив свечей, распарсив строку
+         * */
+        std::vector<Candle> cndls;
+        for (auto it : parsed_df) {
+            cndls.push_back(Candle(parser_in_data(it, "TRADEDATE"),
+                      float(std::atof(parser_in_data(it, "OPEN").c_str())),
+                      float(std::atof(parser_in_data(it, "CLOSE").c_str())),
+                      float(std::atof(parser_in_data(it, "LOW").c_str())),
+                      float(std::atof(parser_in_data(it, "HIGH").c_str()))));
+        }
+    
+        return cndls;
     }
 };
 
