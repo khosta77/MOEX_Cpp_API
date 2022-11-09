@@ -3,8 +3,6 @@
 
 using namespace std;
 
-
-
 #include "Date.h"
 
 int main() {
