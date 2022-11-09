@@ -2,27 +2,20 @@ TARGET=./main
 CC=g++
 SRCS=\
 	./main.cpp \
-	./RtMOEX.h \
-	./HMOEX.h \
-	./utilities.h \
-	./utilities.cpp \
-	./Candle.h \
-	./Date.h
+	./utilities.cpp
 LIBS=\
     -lboost_system \
-    -pthread
+    -pthread \
+    -lc++
 
-#WALL=\
-#    -Wall \
-#    -Wextra \
-#    -Werror \
-#    -ansi
-SVN=17  # Версия cpp
+STD=-std=c++17  # Версия cpp
+IL=-I /Users/stepanfilimonov/boost-iosx/boost -L /Users/stepanfilimonov/boost-iosx/boost/stage/lib
+# WER=-Wall -Wextra -Werror -ansi
 
 all: clean $(TARGET)
 
 $(TARGET):
-	$(CC) -std=c++$(SVN) -lm -o $(TARGET) $(addprefix -I,$(HDRS)) $(CFLAGS) $(SRCS) $(LIBS)
+	$(CC) $(STD) $(IL) $(LIBS) -o $(TARGET) $(SRCS)
 
 build: $(TARGET)
 
