@@ -25,9 +25,8 @@ struct Date {
         std::time_t t = std::time(0);
         std::tm* now = std::localtime(&t);
         this->year = (now->tm_year + 1900);
-        this->month = (now->tm_mon + 1);
-        this->day = (now->tm_mday);
-//        std::time_t time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        this->month = ++now->tm_mon;
+        this->day = now->tm_mday;
         std::string s = std::ctime(&t);
         boost::tokenizer<> tok(s);
         auto d = *tok.begin();
@@ -42,10 +41,10 @@ struct Date {
     }
 
     Date(const std::string &dt) {
-        year = atoi(dt.substr(0, 4).c_str());
-        month = atoi(dt.substr(5, 2).c_str());
-        day = atoi(dt.substr(8, 2).c_str());
-        working_day = 0;
+        this->year = atoi(dt.substr(0, 4).c_str());
+        this->month = atoi(dt.substr(5, 2).c_str());
+        this->day = atoi(dt.substr(8, 2).c_str());
+        this->working_day = 0;
         [[maybe_unused]] Date test(year, month, day);
     }
 
@@ -80,15 +79,18 @@ struct Date {
         next();
         return *this;
     }
+
     Date operator++(int) {
         Date b = *this;
         next();
         return b;
     }
+
     Date operator--() {
         prev();
         return *this;
     }
+
     Date operator--(int) {
         Date b = *this;
         prev();
@@ -135,25 +137,5 @@ private:
         }
     }
 };
-
-//struct Today : Day {
-//    std::string time;
-//
-//    Today() = default;
-//    ~Today() = default;
-//    const std::string checkTime() {
-//        std::time_t t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-//        std::string s = std::ctime(&t);
-//        boost::tokenizer<> tok(s);
-//        auto d = tok.begin();
-//        ++d; ++d; ++d;
-//        time += *d + ":"; ++d;
-//        time += *d + ":"; ++d;
-//        time += *d;
-//        return time;
-//    }
-//
-//    inline const std::string getTime() noexcept { return time; }
-//};
 
 #endif //MOEXPARSER_DATE_H
