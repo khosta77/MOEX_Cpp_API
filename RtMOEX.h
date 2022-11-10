@@ -11,6 +11,7 @@
 #include <fstream>
 #include <string>
 #include "Date.h"
+#include "Time.h"
 #include "utilities.h"
 
 
@@ -49,7 +50,7 @@ protected:
             target += "&from=" + first.date();
             target += "&till=" + last.date();
         }
-        saveas(target, "target.txt");
+        // saveas(target, "target.txt");
         return target;
     }
 
@@ -118,7 +119,7 @@ public:
         /*
          * Очищаем полученный запрос от лишней информации и разбиваем его на строки
          * */
-        std::vector<std::string> parsed_df = split_the_request_into_rows(df);
+        std::vector<std::string> parsed_df = split_the_request_into_rows(df); saveas(parsed_df[0], "daydt.txt");
 
         /*
          * Получаем массив свечей, распарсив строку
@@ -126,21 +127,22 @@ public:
         if (!histoty_status().empty()) {
             std::vector<Candle> cndls;
             for (auto it : parsed_df) {
-                cndls.push_back(Candle(parser_in_data(it, "TRADEDATE"),
-                                       float(std::atof(parser_in_data(it, "OPEN").c_str())),
-                                       float(std::atof(parser_in_data(it, "CLOSE").c_str())),
-                                       float(std::atof(parser_in_data(it, "LOW").c_str())),
-                                       float(std::atof(parser_in_data(it, "HIGH").c_str()))));
+                cndls.push_back(Candle(Candle(float(std::atof(parser_in_data(it, "OPEN").c_str())),
+                                              float(std::atof(parser_in_data(it, "CLOSE").c_str())),
+                                              float(std::atof(parser_in_data(it, "LOW").c_str())),
+                                              float(std::atof(parser_in_data(it, "HIGH").c_str()))), 
+                                       Date(parser_in_data(it, "TRADEDATE"))));
             }
 
             return cndls;
         }
         
-        Candle cndl(Date().date(),
-                    float(std::atof(parser_in_data(parsed_df[0], "OPEN").c_str())),
-                    float(std::atof(parser_in_data(parsed_df[0], "CLOSE").c_str())),
-                    float(std::atof(parser_in_data(parsed_df[0], "LOW").c_str())),
-                    float(std::atof(parser_in_data(parsed_df[0], "HIGH").c_str())));
+        Candle cndl(Candle(float(std::atof(parser_in_data(parsed_df[0], "OPEN").c_str())),
+                           float(std::atof(parser_in_data(parsed_df[0], "CLOSE").c_str())),
+                           float(std::atof(parser_in_data(parsed_df[0], "LOW").c_str())),
+                           float(std::atof(parser_in_data(parsed_df[0], "HIGH").c_str()))),
+                    Time(parser_in_data(parsed_df[0], "TIME")));
+
         return cndl;
     }
 };
