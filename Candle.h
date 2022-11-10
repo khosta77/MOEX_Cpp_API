@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <map>
 #include "Date.h"
+#include "Time.h"
+
 
 class _no_element : public std::exception {
     std::string error;
@@ -30,11 +32,11 @@ public:
  * */
 class Candle {
     Date date;
+    Time time;
     std::map<const char*, float> df_candle;
 
 public:
-    Candle(const std::string &DATE, const float &OPEN, const float &CLOSE, const float &LOW, const float &HIGH) :
-            date(DATE) {
+    Candle( const float &OPEN, const float &CLOSE, const float &LOW, const float &HIGH) {
         df_candle["OPEN"] = OPEN;
         df_candle["CLOSE"] = CLOSE;
         df_candle["LOW"] = LOW;
@@ -43,8 +45,13 @@ public:
 
     Candle(const Candle &cl) {
         date = cl.date;
+        time = cl.time;
         df_candle = cl.df_candle;
     }
+
+    Candle(const Candle &cl, const Time &t) : df_candle(cl.df_candle), time(t) {}
+    Candle(const Candle &cl, const Date &d) : df_candle(cl.df_candle), date(d) {}
+    Candle(const Candle &cl, const Time &t, const Date &d) : df_candle(cl.df_candle), time(t), date(d) {}
 
     Candle() = default;
 
@@ -52,6 +59,7 @@ public:
         if (*this == cl)
             return *this;
         date = cl.date;
+        time = cl.time;
         df_candle = cl.df_candle;
         return *this;
     }
@@ -61,14 +69,18 @@ public:
     }
 
     bool operator==(const Candle &cl) {
+        if (time != cl.time)
+            return false;
         if (date != cl.date)
             return false;
         return (this->df_candle == cl.df_candle) ? true : false;
     }
 
-    boost::variant<float, Date>  operator[] (const std::string parameter) {
+    boost::variant<float, Date, Time>  operator[] (const std::string parameter) {
         if (parameter == "DATE")
             return this->date;
+        else if (parameter == "TIME")
+            return this->time;
         else if (parameter == "OPEN" || parameter == "CLOSE" || parameter == "LOW" || parameter == "HIGH")
             return this->df_candle[parameter.c_str()];
         else
