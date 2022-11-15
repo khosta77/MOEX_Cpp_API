@@ -23,18 +23,30 @@ public:
 
 /** \class Candle
  * \param date - дата свечи
- *     DATA  - Дата свечи
+ *     DATA
+ * \param time - время свечи, только если внутри дня
+ *     TIME
  * \param df_candle - тело свечи
  *     OPEN  - Цена открытия свечи
  *     CLOSE - Цена закрытия свечи
  *     LOW   - Минимальная цена в свече
  *     HIGH  - Маскимальная цена в свече
+ * \param value - Объем последней сделки, в руб.
+ *     VALUE
+ * \param numtrades - Количество сделок за торговый день
+ *     NUMTRADES
+ *
+ * О концепциях:
+ * - Старая. Предполагает использование Candle как объект map, это будет полезно в некоторых сценариях, но технически дорогостояще
+ *
+ * - Новая. Candle это структура, обращение к значению через ее переменную
  * */
 class Candle {
     Date date;
     Time time;
-    std::map<const char*, float> df_candle;
-
+    std::map<const char*, float> df_candle;  // тело свечи 
+    std::size_t value;  // объем
+    std::size_t numtrades; // количество сделок за торговый день
 public:
     Candle( const float &OPEN, const float &CLOSE, const float &LOW, const float &HIGH) {
         df_candle["OPEN"] = OPEN;
@@ -76,15 +88,24 @@ public:
         return (this->df_candle == cl.df_candle) ? true : false;
     }
 
-    boost::variant<float, Date, Time>  operator[] (const std::string parameter) {
+    inline void value_init(const std::size_t &v) {  this->value = v; }
+    inline const std::size_t value() const {  return this->value; }
+ 
+    inline void numtrades_init(const std::size_t &n) {  this->numtrades = n; }
+    inline const std::size_t numtrades() const {  return this->numtrades; }
+
+    boost::variant<float, Date, Time, std::size_t>  operator[] (const std::string parameter) {
+        if (parameter == "OPEN" || parameter == "CLOSE" || parameter == "LOW" || parameter == "HIGH")
+            return this->df_candle[parameter.c_str()];
         if (parameter == "DATE")
             return this->date;
-        else if (parameter == "TIME")
+        if (parameter == "TIME")
             return this->time;
-        else if (parameter == "OPEN" || parameter == "CLOSE" || parameter == "LOW" || parameter == "HIGH")
-            return this->df_candle[parameter.c_str()];
-        else
-            throw _no_element(parameter);
+        if (parameter == "VALUE")
+            return this->value;
+        if (parameter == "NUMTRADES")
+            return this->numtrades;
+        throw _no_element(parameter);
     }
 };
 
