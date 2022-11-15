@@ -10,58 +10,23 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <string>
+#include <vector>
+#include <map>
 #include "Date.h"
 #include "Time.h"
 #include "utilities.h"
 
 
-class RtMOEX {
+class guideMOEX {
 protected:
     const std::string HOST = "iss.moex.com";  // ссылка на MOEX
-// TODO: переделать
-    std::string history;  // История/настоящие время
-    std::string engine;  // Доступные торговые системы
-    std::string market;  // Рынки торговой системы
-    std::string session;  // Список сессий доступных в итогах торгов. Только для фондового рынка!
-    std::string board;  // Режимы торгов рынка
-// TODO: вырезать
-    [[nodiscard]] virtual inline const std::string histoty_status() const {  return this->history; }
-    [[nodiscard]] virtual inline const std::string egnines_status() const {  return this->engine; }
-    [[nodiscard]] virtual inline const std::string markets_status() const {  return this->market; }
-    [[nodiscard]] virtual inline const std::string sessions_status() const {  return this->session; }
-    [[nodiscard]] virtual inline const std::string boards_status() const {  return this->board; }
 
-    /** \brief - метод формирует запрос к серверу, подставляет нужные параметры.
-     * \param SECID - акция
-     * \param first - первая дата
-     * \param last - вторая дата
-     * */
-    inline const std::string get_target_form(const std::string &SECID, Date first, Date last) {
-        std::string target;
-        target += "/iss" + histoty_status();
-        target += "/engines/" + egnines_status();
-        target += "/markets/" + markets_status();
-        if (!histoty_status().empty())
-            target += "/sessions/" + sessions_status();
-        target += "/boards/" + boards_status();
-        target += "/securities/" + SECID + ".xml?iss.meta=off&";
-        target += (histoty_status().empty()) ? "iss.only=marketdata" : "iss.only=history";
-        if (!histoty_status().empty()) {
-            target += "&from=" + first.date();
-            target += "&till=" + last.date();
-        }
-        // saveas(target, "target.txt");
-        return target;
-    }
-
-    std::string get_request_to_MOEX_in_the_format_xml(const std::string &SECID, Date first = Date(), Date last = Date()) {
-        if (first == Date())
-            --first;
-
+    std::string get_request_to_MOEX_in_the_format_xml(const std::string &quest) {
         namespace http = boost::beast::http;
 
         const std::string host = HOST;
-        const std::string target = get_target_form(SECID, first, last);
+        const std::string target = quest;
 
         // I/O контекст, необходимый для всех I/O операций
         boost::asio::io_context ioc;
@@ -99,17 +64,32 @@ protected:
     std::vector<std::string> split_the_request_into_rows(const std::string &df) {
         std::string s = cut(df, "<row ");
         s = s.substr(0, s.find("</rows>"));
-        return position::get(s);
+        return position::get(s, false);
     }
 
-
-//#include "Candle.h"
-
 public:
-    RtMOEX() = default;
-    ~RtMOEX() = default;
+    guideMOEX() = default;
+    ~guideMOEX() = default;
 
-    std::vector<std::string> parser(const std::string &secid);
+    // Доступные торговые системы
+    std::vector<std::pair<std::string, std::string>> engines() {
+        std::string df = get_request_to_MOEX_in_the_format_xml("/iss/engines.xml?iss.meta=off");
+        std::vector<std::string> cdf = split_the_request_into_rows(df);
+        std::vector<std::pair<std::string, std::string>> obj;
+        for (auto it : cdf)
+            obj.push_back(std::pair(parser_in_data(it, "name").c_str(), parser_in_data(it, "title").c_str()));
+        return obj;
+    }
+
+    // Рынки торговой системы.
+    std::vector<std::pair<std::string, std::string>> markets(const std::string &engine) {
+        std::string df = get_request_to_MOEX_in_the_format_xml(("/iss/engines/" + engine + "/markets.xml?iss.meta=off"));
+        std::vector<std::string> cdf = split_the_request_into_rows(df);
+        std::vector<std::pair<std::string, std::string>> obj;
+        for (auto it : cdf)
+            obj.push_back(std::pair(parser_in_data(it, "NAME").c_str(), parser_in_data(it, "title").c_str()));
+        return obj;
+    }
 };
 
 
