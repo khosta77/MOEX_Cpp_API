@@ -1,16 +1,21 @@
 #include <iostream>
-#include "DMOEX.h"
-#include "Time.h"
+#include "GuideMOEX.h"
 
 using namespace std;
 
-#include "Date.h"
 
 int main() {
-    moex_day md;
-    // Date d1("2022-10-31"), d2("2022-11-3");
-    [[maybe_unused]] auto df = md.parser("MTSS");
-    Time t("22:12:3");
-    cout << t.time() << endl;
+    guideMOEX md;
+    [[maybe_unused]] auto df = md.engines();
+    cout << df.size() << endl;
+    for(auto it : df) {
+        cout << it.first << " " << it.second << endl;
+    }
+    cout << endl;
+    cout << "Запрос был по: " << df[0].first << endl;
+    [[maybe_unused]] auto df2 = md.markets(df[0].first);
+    for(auto it : df2) {
+        cout << it.first << " | " << it.second << endl;
+    }
     return 0;
 }
