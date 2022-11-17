@@ -5,7 +5,6 @@
 #include <boost/beast.hpp>
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
-#include <boost/variant.hpp>
 #include <boost/property_tree/detail/rapidxml.hpp>
 #include <iostream>
 #include <fstream>
@@ -17,7 +16,9 @@
 #include "Time.h"
 #include "utilities.h"
 
-
+/** \bref guideMOEX - справочник по MOEX. \
+ * Про то какие торговые системы есть, торговые рынки/сессии/режими
+ * */
 class guideMOEX {
 protected:
     const std::string HOST = "iss.moex.com";  // ссылка на MOEX
@@ -67,29 +68,63 @@ protected:
         return position::get(s, false);
     }
 
+    std::vector<std::pair<std::string, std::string>> request(const std::string &req, const std::string &n, const std::string &t) {
+        std::string df = get_request_to_MOEX_in_the_format_xml(req);
+        std::vector<std::string> cdf = split_the_request_into_rows(df);
+        std::vector<std::pair<std::string, std::string>> obj;
+        for (auto it : cdf)
+            obj.push_back(std::pair(parser_in_data(it, n).c_str(), parser_in_data(it, t).c_str()));
+        return obj;
+    }
+
+
 public:
     guideMOEX() = default;
     ~guideMOEX() = default;
 
-    // Доступные торговые системы
+    /** \bref -  доступные торговые системы
+     * */
     std::vector<std::pair<std::string, std::string>> engines() {
-        std::string df = get_request_to_MOEX_in_the_format_xml("/iss/engines.xml?iss.meta=off");
-        std::vector<std::string> cdf = split_the_request_into_rows(df);
-        std::vector<std::pair<std::string, std::string>> obj;
-        for (auto it : cdf)
-            obj.push_back(std::pair(parser_in_data(it, "name").c_str(), parser_in_data(it, "title").c_str()));
-        return obj;
+        std::string req = "/iss/engines.xml?iss.meta=off";
+        return request(req, "name", "title");
     }
 
-    // Рынки торговой системы.
+    /** \bref -  рынки торговой системы
+     *  \param engine - доступные торговые системы
+     * */
     std::vector<std::pair<std::string, std::string>> markets(const std::string &engine) {
-        std::string df = get_request_to_MOEX_in_the_format_xml(("/iss/engines/" + engine + "/markets.xml?iss.meta=off"));
-        std::vector<std::string> cdf = split_the_request_into_rows(df);
-        std::vector<std::pair<std::string, std::string>> obj;
-        for (auto it : cdf)
-            obj.push_back(std::pair(parser_in_data(it, "NAME").c_str(), parser_in_data(it, "title").c_str()));
-        return obj;
+        std::string req = ("/iss/engines/" + engine + "/markets.xml?iss.meta=off");
+        return request(req, "NAME", "title");
     }
+
+    /** \bref - Режимы торгов рынка
+     *  \param engine - доступные торговые системы
+     *  \param market - рынки торговой системы 
+     * */
+    std::vector<std::pair<std::string, std::string>> boards(const std::string &engine, const std::string &market) {
+        std::string req = ("/iss/engines/" + engine + "/markets/" + market + "/boards.xml?iss.meta=off"); 
+        return request(req, "boardid", "title");
+    }
+
+    /** \bref - Список сессий доступных в итогах торгов; Только для фондового рынка!
+     *  \param engine - доступные торговые системы
+     *  \param market - рынки торговой системы 
+     * */ 
+    std::vector<std::pair<std::string, std::string>> sessions(const std::string &engine, const std::string &market) {
+        std::string req = ("/iss/engines/" + engine + "/markets/" + market + "/sessions.xml?iss.meta=off");
+        return request(req, "id", "title");
+    }
+
+    /* Дополнительно можно еще получать типы и группы ценных бумаг, но как я пришел к выводу - они нигде не используются.
+     * При запросе к историческим или дневным данным вот это не используют. В диведентах это тоже не участвует,
+     * смысла особо нет запрашивать/реализовывать, оставлю реализацию на усмотрение комьюнити...
+     *
+     * // Группы ценных бумаг
+     * https://iss.moex.com/iss/securitygroups.xml
+     *
+     * // Типы ценных бумаг
+     * https://iss.moex.com/iss/securitytypes.xml
+     * */
 };
 
 
