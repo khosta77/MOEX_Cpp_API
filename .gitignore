@@ -3,3 +3,5 @@ main
 *.xml
 SL_MOEX.h
 *.txt
+*.log
+*.DS_Store
