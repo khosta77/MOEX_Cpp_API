@@ -22,7 +22,7 @@
 #include <chrono>
 
 #define LOG "main.log"
-#define TEST_SIZE 100
+#define TEST_SIZE 10
 #endif
 
 #if TEST_METHODS
@@ -193,7 +193,7 @@ public:
 #endif
     }
 
-    boost::variant<std::vector<Candle>, Candle> parser(const std::string &secid, Date first = Date(), Date last = Date()) {
+    std::vector<Candle> parser(const std::string &secid, Date first = Date(), Date last = Date()) {
         /*
          * Делаем get-запрос к серверу, чтобы получить информаци об акции. Информаци получаем ввиде единой строки,
          * в ней будет как лишняя, так и нужная информация.
@@ -204,6 +204,7 @@ public:
         std::string df = get_request_to_MOEX_in_the_format_xml(secid, first, last);
 #if TEST_METHODS
         end = std::chrono::steady_clock::now();
+        saveas(df, "df.txt");
         t = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
         t_get.push_back(t); //
 #endif
@@ -225,7 +226,7 @@ public:
 #if TEST_METHODS
         start = std::chrono::steady_clock::now();
 #endif
-        if (!histoty_status().empty()) {
+       // if (!histoty_status().empty()) {
             std::vector<Candle> cndls;
             for (auto it : parsed_df) {
                 cndls.push_back(Candle(Candle(float(std::atof(parser_in_data(it, "OPEN").c_str())),
@@ -240,7 +241,8 @@ public:
         t_cndls.push_back(t); //       start = std::chrono::steady_cloc
 #endif
             return cndls;
-        }
+       // }
+#if 0
 #if TEST_METHODS
         start = std::chrono::steady_clock::now();
 
@@ -257,6 +259,7 @@ public:
 
 #endif
         return cndl;
+#endif
     }
 };
 
