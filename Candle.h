@@ -89,10 +89,10 @@ public:
     }
 
     inline void value_init(const std::size_t &v) {  this->value = v; }
-    inline const std::size_t value() const {  return this->value; }
+    inline const std::size_t get_value() const {  return this->value; }
  
     inline void numtrades_init(const std::size_t &n) {  this->numtrades = n; }
-    inline const std::size_t numtrades() const {  return this->numtrades; }
+    inline const std::size_t get_numtrades() const {  return this->numtrades; }
 
     boost::variant<float, Date, Time, std::size_t>  operator[] (const std::string parameter) {
         if (parameter == "OPEN" || parameter == "CLOSE" || parameter == "LOW" || parameter == "HIGH")
