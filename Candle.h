@@ -42,6 +42,7 @@ public:
  * - Новая. Candle это структура, обращение к значению через ее переменную
  * */
 class Candle {
+public:
     Date date;
     Time time;
     std::map<const char*, float> df_candle;  // тело свечи 
