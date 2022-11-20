@@ -5,8 +5,7 @@ SRCS=\
 	./utilities.cpp
 LIBS=\
     -lboost_system \
-    -pthread \
-    -lc++
+    -pthread
 
 STD=-std=c++17  # Версия cpp
 #IL=-I /Users/stepanfilimonov/boost-iosx/boost -L /Users/stepanfilimonov/boost-iosx/boost/stage/lib
